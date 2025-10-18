@@ -24,9 +24,17 @@ defmodule BookingWeb.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", BookingWeb do
-  #   pipe_through :api
-  # end
+
+  scope "/api" do
+    pipe_through :api
+
+    forward "/graphiql", Absinthe.Plug.GraphiQL,
+      schema: BookingWeb.Schema.Schema,
+      interface: :simple,
+      context: %{pubsub: BookingWeb.Endpoint}
+
+    forward "/", Absinthe.Plug, schema: BookingWeb.Schema.Schema
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:booking, :dev_routes) do

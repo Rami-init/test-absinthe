@@ -1,4 +1,4 @@
-defmodule Booking.Vacation.Booking do
+defmodule Booking.Vacation.VacationBooking do
   use Ecto.Schema
   import Ecto.Changeset
 
