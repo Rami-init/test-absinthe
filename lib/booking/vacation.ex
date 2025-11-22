@@ -7,7 +7,7 @@ defmodule Booking.Vacation do
   end
 
   def get_place_by_slug(slug) do
-    Repo.get(Place, slug: slug)
+    Repo.get_by(Place, slug: slug)
   end
 
   def get_booking(id) do

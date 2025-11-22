@@ -30,8 +30,9 @@ defmodule BookingWeb.Router do
 
     forward "/graphiql", Absinthe.Plug.GraphiQL,
       schema: BookingWeb.Schema.Schema,
-      interface: :simple,
-      context: %{pubsub: BookingWeb.Endpoint}
+      interface: :simple
+
+    # context: %{pubsub: BookingWeb.Endpoint}
 
     forward "/", Absinthe.Plug, schema: BookingWeb.Schema.Schema
   end
