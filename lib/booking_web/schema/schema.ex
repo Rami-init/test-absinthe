@@ -15,5 +15,17 @@ defmodule BookingWeb.Schema.Schema do
         end
       end)
     end
+
+    @desc "query to get all places"
+    field :places, list_of(:place) do
+      arg(:limit, :integer, default_value: 10)
+      arg(:order_by, type: :sort_order, default_value: :asc)
+      arg(:filter, :place_filter)
+
+      resolve(fn _, args, _ ->
+        places = Booking.Vacation.list_places(args)
+        {:ok, places}
+      end)
+    end
   end
 end

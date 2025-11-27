@@ -15,4 +15,23 @@ defmodule BookingWeb.Schema.ContentTypes do
     field :pool, non_null(:boolean)
     field :wifi, non_null(:boolean)
   end
+
+  enum :sort_order do
+    value(:asc)
+    value(:desc)
+  end
+
+  input_object :place_filter do
+    field :matching, :string
+    field :wifi, :boolean
+    field :pool, :boolean
+    field :pet_friendly, :boolean
+    field :guest_count, :integer
+    field :available_between, :date_range
+  end
+
+  input_object :date_range do
+    field :start_date, non_null(:date)
+    field :end_date, non_null(:date)
+  end
 end
