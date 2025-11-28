@@ -80,6 +80,13 @@ defmodule Booking.Accounts do
     |> Repo.insert()
   end
 
+  def sign_up(attrs) do
+    %User{}
+    |> User.email_changeset(attrs)
+    |> User.password_changeset(attrs)
+    |> Repo.insert()
+  end
+
   ## Settings
 
   @doc """
@@ -294,4 +301,10 @@ defmodule Booking.Accounts do
       end
     end)
   end
+
+  def datasource do
+    Dataloader.Ecto.new(Repo, query: &query/2)
+  end
+
+  def query(queryable, _params), do: queryable
 end

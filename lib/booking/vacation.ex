@@ -1,7 +1,8 @@
 defmodule Booking.Vacation do
   alias Booking.Repo
   import Ecto.Query
-  alias Booking.Vacation.{Place, VacationBooking}
+  alias Booking.Accounts.User
+  alias Booking.Vacation.{Place, VacationBooking, Review}
 
   def list_places() do
     Repo.all(Place)
@@ -19,7 +20,6 @@ defmodule Booking.Vacation do
       {:limit, limit}, query -> from(p in query, limit: ^limit)
       _, query -> query
     end)
-    |> IO.inspect(label: "Final Query")
     |> Repo.all()
   end
 
@@ -57,4 +57,39 @@ defmodule Booking.Vacation do
   def get_booking(id) do
     Repo.get!(VacationBooking, id)
   end
+
+  def list_bookings_for_place(%Place{} = place) do
+    VacationBooking |> where(place_id: ^place.id) |> where(state: "confirmed") |> Repo.all()
+  end
+
+  def create_booking(%User{} = user, attrs) do
+    user_scope = %{user: user}
+
+    %VacationBooking{}
+    |> VacationBooking.changeset(attrs, user_scope)
+    |> Repo.insert()
+  end
+
+  def cancel_booking(%VacationBooking{} = booking) do
+    booking
+    |> VacationBooking.changeset(%{state: "cancelled"}, %{user: %User{id: booking.user_id}})
+    |> Repo.update()
+  end
+
+  def create_review(%User{} = user, attrs) do
+    user_scope = %{user: user}
+
+    %Review{}
+    |> Review.changeset(attrs, user_scope)
+    |> Repo.insert()
+  end
+
+  def datasource do
+    Dataloader.Ecto.new(Repo, query: &query/2)
+  end
+
+  def query(VacationBooking, %{scope: :place}),
+    do: from(b in VacationBooking, where: b.state == "confirmed", order_by: [desc: b.start_date])
+
+  def query(queryable, _params), do: queryable
 end
