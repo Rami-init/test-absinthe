@@ -17,7 +17,8 @@ defmodule Booking.Application do
       # Start a worker by calling: Booking.Worker.start_link(arg)
       # {Booking.Worker, arg},
       # Start to serve requests, typically the last entry
-      BookingWeb.Endpoint
+      BookingWeb.Endpoint,
+      {Absinthe.Subscription, BookingWeb.Endpoint}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

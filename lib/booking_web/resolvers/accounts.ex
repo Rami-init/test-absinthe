@@ -1,7 +1,6 @@
 defmodule BookingWeb.Resolvers.Accounts do
   alias Booking.Accounts
   alias BookingWeb.Schema.ChangesetErrors
-  alias Booking.Accounts.UserToken
 
   def sign_up(_, %{email: email, password: password}, _) do
     case Accounts.sign_up(%{email: email, password: password}) do
@@ -26,5 +25,13 @@ defmodule BookingWeb.Resolvers.Accounts do
         token = Accounts.generate_user_session_token(user)
         {:ok, %{user: user, token: Base.encode64(token)}}
     end
+  end
+
+  def current_user(_, _, %{context: %{current_user: user}}) do
+    {:ok, user}
+  end
+
+  def current_user(_, _, _) do
+    {:error, "Not authenticated"}
   end
 end

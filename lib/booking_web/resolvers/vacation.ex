@@ -22,6 +22,7 @@ defmodule BookingWeb.Resolvers.Vacation do
   def create_booking(_, attrs, %{context: %{current_user: user}}) do
     case Vacation.create_booking(user, attrs) do
       {:ok, booking} ->
+        publish_new_booking(booking)
         {:ok, booking}
 
       {:error, changeset} ->
@@ -38,6 +39,7 @@ defmodule BookingWeb.Resolvers.Vacation do
     else
       case Booking.Vacation.cancel_booking(booking) do
         {:ok, canceled_booking} ->
+          publish_booking_cancelled(canceled_booking)
           {:ok, canceled_booking}
 
         {:error, changeset} ->
@@ -56,5 +58,21 @@ defmodule BookingWeb.Resolvers.Vacation do
         {:error,
          message: "Could not create review", details: ChangesetErrors.errors_details(changeset)}
     end
+  end
+
+  defp publish_new_booking(booking) do
+    Absinthe.Subscription.publish(
+      BookingWeb.Endpoint,
+      booking,
+      new_booking: "place:#{booking.place_id}"
+    )
+  end
+
+  defp publish_booking_cancelled(booking) do
+    Absinthe.Subscription.publish(
+      BookingWeb.Endpoint,
+      booking,
+      booking_cancelled: "place:#{booking.place_id}"
+    )
   end
 end

@@ -20,6 +20,12 @@ defmodule BookingWeb.Schema.Schema do
 
       resolve(&BookingWeb.Resolvers.Vacation.list_places/3)
     end
+
+    @desc "query to get current user"
+    field :me, :user do
+      middleware(BookingWeb.Schema.Middleware.Authenticate)
+      resolve(&BookingWeb.Resolvers.Accounts.current_user/3)
+    end
   end
 
   mutation do
@@ -28,18 +34,21 @@ defmodule BookingWeb.Schema.Schema do
       arg(:place_id, non_null(:id))
       arg(:start_date, non_null(:date))
       arg(:end_date, non_null(:date))
+      middleware(BookingWeb.Schema.Middleware.Authenticate)
       resolve(&BookingWeb.Resolvers.Vacation.create_booking/3)
     end
 
     @desc "cancel a booking"
     field :cancel_booking, :booking do
       arg(:booking_id, non_null(:id))
+      middleware(BookingWeb.Schema.Middleware.Authenticate)
       resolve(&BookingWeb.Resolvers.Vacation.cancel_booking/3)
     end
 
     @desc "create a review for a place"
     field :create_review, :review do
       arg(:review, non_null(:review_input))
+      middleware(BookingWeb.Schema.Middleware.Authenticate)
       resolve(&BookingWeb.Resolvers.Vacation.create_review/3)
     end
 
@@ -58,8 +67,28 @@ defmodule BookingWeb.Schema.Schema do
     end
   end
 
+  subscription do
+    @desc "subscription for new bookings for a place"
+    field :new_booking, :booking do
+      arg(:place_id, non_null(:id))
+
+      config(fn %{place_id: place_id}, _ ->
+        {:ok, topic: "place:#{place_id}"}
+      end)
+    end
+
+    @desc "subscription for cancelled bookings for a place"
+    field :booking_cancelled, :booking do
+      arg(:place_id, non_null(:id))
+
+      config(fn %{place_id: place_id}, _ ->
+        {:ok, topic: "place:#{place_id}"}
+      end)
+    end
+  end
+
   def context(ctx) do
-    current_user = Booking.Accounts.get_user_by_email("user1@example.com")
+    IO.inspect(ctx)
 
     loader =
       Dataloader.new()
@@ -67,7 +96,6 @@ defmodule BookingWeb.Schema.Schema do
       |> Dataloader.add_source(Accounts, Accounts.datasource())
 
     ctx
-    |> Map.put(:current_user, current_user)
     |> Map.put(:loader, loader)
   end
 

@@ -15,6 +15,7 @@ defmodule BookingWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug BookingWeb.Context
   end
 
   scope "/", BookingWeb do
@@ -30,9 +31,8 @@ defmodule BookingWeb.Router do
 
     forward "/graphiql", Absinthe.Plug.GraphiQL,
       schema: BookingWeb.Schema.Schema,
-      interface: :simple
-
-    # context: %{pubsub: BookingWeb.Endpoint}
+      socket: BookingWeb.UserSocket,
+      interface: :playground
 
     forward "/", Absinthe.Plug, schema: BookingWeb.Schema.Schema
   end
